@@ -170,11 +170,13 @@ struct Internal {
   vector<int> ptab;             // table for caching probing attempts
   vector<int64_t> ntab;         // number of one-sided occurrences table
   vector<Bins> big;             // binary implication graph
-  vector<Watches> wtab;         // table of watches for all literals
+  vector<Watches> wtab;         // table of watches for all literals for normally watched clauses
+  vector<Watches> loc_wtab;     // table of watches for all literals for locally watched clauses
   Clause * conflict;            // set in 'propagation', reset in 'analyze'
   Clause * ignore;              // ignored during 'vivify_propagate'
   size_t propagated;            // next trail position to propagate
   size_t propagated2;           // next binary trail position to propagate
+  size_t propagated_loc;	// next trail position to propagate locally watched clauses
   size_t best_assigned;         // best maximum assigned ever
   size_t target_assigned;       // maximum assigned without conflict
   size_t no_conflict_until;     // largest trail prefix without conflict
@@ -318,12 +320,13 @@ struct Internal {
   flags (int lit) const       { return ftab[vidx (lit)]; }
 
   bool occurring () const     { return !otab.empty (); }
-  bool watching () const      { return !wtab.empty (); }
+  bool watching () const      { assert( !wtab.empty() || loc_wtab.empty() ); return !wtab.empty (); }
 
   Bins & bins (int lit)       { return big[vlit (lit)]; }
   Occs & occs (int lit)       { return otab[vlit (lit)]; }
   int64_t & noccs (int lit)   { return ntab[vlit (lit)]; }
   Watches & watches (int lit) { return wtab[vlit (lit)]; }
+  Watches & loc_watches (int lit) { return loc_wtab[vlit (lit)]; }
 
   // Variable bumping through exponential VSIDS (EVSIDS) as in MiniSAT.
   //
@@ -428,8 +431,14 @@ struct Internal {
   void unmark_clause ();        // unmark 'this->clause'
   void unmark (Clause *);
 
-  // Watch literal 'lit' in clause with blocking literal 'blit'.
+  // Watch literal 'lit' normally in clause with blocking literal 'blit'.
   // Inlined here, since it occurs in the tight inner loop of 'propagate'.
+  //
+  // So far as I understand this is safe to be used with both, binary and
+  // non-binary clauses, as the ordering of binaries before non-binaries
+  // is not assumed. Binary clauses are put at the front of the
+  // watches-list for every literal when connect_watches or sort_watches.
+  // Is called.
   //
   inline void watch_literal (int lit, int blit, Clause * c) {
     assert (lit != blit);
@@ -438,10 +447,15 @@ struct Internal {
     LOG (c, "watch %d blit %d in", lit, blit);
   }
 
-  // Add two watches to a clause.  This is used initially during allocation
-  // of a clause and during connecting back all watches after preprocessing.
+  // Add two normal watches to a clause. This is used initially during 
+  // allocation of a clause and during connecting back all watches after 
+  // preprocessing.
+  //
+  // The flag locally_watched is not set by watch_clause or unwatch_clause
+  // but instead only set to true by the method loc_watch_clause.
   //
   inline void watch_clause (Clause * c) {
+    assert (c->locally_watched == false);
     const int l0 = c->literals[0];
     const int l1 = c->literals[1];
     watch_literal (l0, l1, c);
@@ -453,6 +467,36 @@ struct Internal {
     const int l1 = c->literals[1];
     remove_watch (watches (l0), c);
     remove_watch (watches (l1), c);
+  }
+
+  // Watch literal 'lit' locally in clause with blocking literal 'blit'.
+  // Inlined here, since it occurs in the tight inner loop of 'propagate'.
+  //
+  inline void loc_watch_literal (int lit, int blit, Clause * c) {
+    assert (lit != blit);
+    Watches & ws = loc_watches (lit);
+    ws.push_back (Watch (blit, c));
+    LOG (c, "locally watch %d blit %d in", lit, blit);
+  }
+
+  // Add two local watches to a clause. This is used initially during 
+  // allocation of a clause and during connecting back all watches after 
+  // preprocessing.
+  //
+  inline void loc_watch_clause (Clause * c) {
+    c->locally_watched = true;
+    const int l0 = c->literals[0];
+    const int l1 = c->literals[1];
+    loc_watch_literal (l0, l1, c);
+    loc_watch_literal (l1, l0, c);
+  }
+
+  inline void loc_unwatch_clause (Clause * c) {
+    c->locally_watched = false;
+    const int l0 = c->literals[0];
+    const int l1 = c->literals[1];
+    remove_watch (loc_watches (l0), c);
+    remove_watch (loc_watches (l1), c);
   }
 
   // Update queue to point to last potentially still unassigned variable.
@@ -499,10 +543,14 @@ struct Internal {
   //
   int assignment_level (int lit, Clause*);
   void search_assign (int lit, Clause *);
+  void loc_search_assign (int lit, Clause *);
   void search_assign_driving (int lit, Clause * reason);
   void search_assume_decision (int decision);
   void assign_unit (int lit);
   bool propagate ();
+  void innerpropagate_with_normal_watches (const int & lit);
+  void propagate_all_local_watches ();
+  void innerpropagate_with_local_watches (const int & lit);
 
   // Undo and restart in 'backtrack.cpp'.
   //
@@ -601,6 +649,9 @@ struct Internal {
   bool propagate_out_of_order_units ();
   void unprotect_reasons ();
   void reduce ();
+
+  //
+  void downgrade_all_local_watches();
 
   // Garbage collection in 'collect.cpp' called from 'reduce' and during
   // inprocessing and preprocessing.

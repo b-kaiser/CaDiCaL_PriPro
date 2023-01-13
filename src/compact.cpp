@@ -221,6 +221,11 @@ void Internal::compact () {
     for (auto lit : lits)
       for (auto & w : watches (lit))
         w.blit = mapper.map_lit (w.blit);
+  //if (!loc_wtab.empty ())
+  //  for (auto lit : lits)
+  //    for (auto & w : loc_watches (lit))
+  //      w.blit = mapper.map_lit (w.blit);
+
 
   // We first flush inactive variables and map the links in the queue.  This
   // has to be done before we map the actual links data structure 'links'.
@@ -329,6 +334,7 @@ void Internal::compact () {
   mapper.map_vector (vtab);
   if (!ntab.empty ()) mapper.map2_vector (ntab);
   if (!wtab.empty ()) mapper.map2_vector (wtab);
+  //if (!loc_wtab.empty ()) mapper.map2_vector (loc_wtab);
   if (!otab.empty ()) mapper.map2_vector (otab);
   if (!big.empty ()) mapper.map2_vector (big);
 

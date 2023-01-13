@@ -24,7 +24,7 @@
 
 #ifdef NBUILD
 #ifndef VERSION
-#  define VERSION "1.4.0"
+#  define VERSION "PriPro"
 #endif // VERSION
 #endif // NBUILD
 
@@ -65,7 +65,7 @@ static const char * COPYRIGHT =
 // GIT SHA2 identifier.
 //
 #ifndef IDENTIFIER
-#  define IDENTIFIER 0
+#  define IDENTIFIER "fcb9e7210dda645c28b6ee178fb502a3520c6036"
 #endif
 
 // Compilation flags.

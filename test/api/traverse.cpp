@@ -63,6 +63,9 @@ struct ClauseChecker : ClauseIterator {
   bool clause (const vector<int> & c) {
     for (const auto & lit : c) cout << lit << ' ';
     cout << '0' << endl;
+    //// The following need to be commented such that make test
+    //// succeds without a failure. Apparently this is connected
+    //// to restarting.
     assert (c.size () == 1);
     assert (c[0] == 4);
     return true;

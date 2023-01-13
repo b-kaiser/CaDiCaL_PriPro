@@ -256,6 +256,10 @@ void Internal::delete_garbage_clauses () {
 // assignment.  In that case update the reason reference.
 //
 void Internal::copy_clause (Clause * c) {
+  // TODO: Is it clear, that the bit indicating whether a clause
+  // if locally watched or not also copied? I cannot say at all.
+  // Currently, I do not have the capacity to understand the
+  // internals of a clause or the reduction mechanism.
   LOG (c, "moving");
   assert (!c->moved);
   char * p = (char*) c;

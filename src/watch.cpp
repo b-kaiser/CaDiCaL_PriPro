@@ -6,24 +6,40 @@ void Internal::init_watches () {
   assert (wtab.empty ());
   while (wtab.size () < 2*vsize)
     wtab.push_back (Watches ());
+  while (loc_wtab.size () < 2*vsize)
+    loc_wtab.push_back (Watches ());
   LOG ("initialized watcher tables");
 }
 
 void Internal::clear_watches () {
   for (auto lit : lits)
     watches (lit).clear ();
+  for (auto lit : lits)
+    loc_watches (lit).clear ();
 }
 
 void Internal::reset_watches () {
   assert (!wtab.empty ());
   erase_vector (wtab);
+  erase_vector (loc_wtab);
   LOG ("reset watcher tables");
+}
+
+void Internal::downgrade_all_local_watches() {
+  for ( auto lit : lits ) {
+    for ( auto w : loc_watches(lit) ) {
+      w.clause->locally_watched = false;
+      watch_literal(lit, w.blit, w.clause);
+    }
+    loc_watches(lit).clear();
+  }
 }
 
 // This can be quite costly since lots of memory is accessed in a rather
 // random fashion, and thus we optionally profile it.
 
 void Internal::connect_watches (bool irredundant_only) {
+  // TODO: Do we need to connect local watches?
   START (connect);
   assert (watching ());
 
@@ -71,6 +87,7 @@ void Internal::connect_watches (bool irredundant_only) {
 }
 
 void Internal::sort_watches () {
+  // TODO: Do we need to sort loc_watches?
   assert (watching ());
   LOG ("sorting watches");
   Watches saved;

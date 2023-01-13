@@ -116,6 +116,7 @@ void Internal::backtrack (int new_level) {
 
   if (propagated > assigned) propagated = assigned;
   if (propagated2 > assigned) propagated2 = assigned;
+  if (propagated_loc > assigned) propagated_loc = assigned;
   if (no_conflict_until > assigned) no_conflict_until = assigned;
 
   control.resize (new_level + 1);

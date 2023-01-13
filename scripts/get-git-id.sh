@@ -1,3 +1,2 @@
 #!/bin/sh
-# print current SHA1 git id which uniquely identifies the source code
-git show 2>/dev/null |awk '{print $2;exit}'
+echo "fcb9e7210dda645c28b6ee178fb502a3520c6036"

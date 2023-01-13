@@ -108,6 +108,7 @@ Clause * Internal::new_clause (bool red, int glue) {
   c->vivified = false;
   c->vivify = false;
   c->used = 0;
+  c->locally_watched = false;
 
   c->glue = glue;
   c->size = size;
@@ -388,7 +389,7 @@ Clause * Internal::new_learned_redundant_clause (int glue) {
   Clause * res = new_clause (true, glue);
   if (proof) proof->add_derived_clause (res);
   assert (watching ());
-  watch_clause (res);
+  loc_watch_clause (res);
   return res;
 }
 

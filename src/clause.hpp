@@ -44,6 +44,12 @@ struct Clause {
   unsigned used:2;    // resolved in conflict analysis since last 'reduce'
   bool vivified:1;    // clause already vivified
   bool vivify:1;      // clause scheduled to be vivified
+  bool locally_watched:1; // whether the clause is locally watched; a clause
+ 			  // shall be either locally or normally watched, 
+			  // never both. The flag is set by loc_watch_clause
+			  // and unset by loc_unwatch_clause. Never changed 
+			  // by anything else. TODO: What about downgrading
+			  // and reseting clauses?
 
   // The glucose level ('LBD' or short 'glue') is a heuristic value for the
   // expected usefulness of a learned clause, where smaller glue is consider

@@ -464,14 +464,23 @@ inline int Internal::find_conflict_level (int & forced) {
     if (highest_position > 1)
       {
         LOG (conflict, "unwatch %d in", lit);
-        remove_watch (watches (lit), conflict);
+        if (conflict->locally_watched) {
+	  remove_watch (loc_watches (lit), conflict);
+	} else {
+	  remove_watch (watches (lit), conflict);
+	}
       }
 
     lits[highest_position] = lit;
     lits[i] = highest_literal;
 
-    if (highest_position > 1)
-      watch_literal (highest_literal, lits[!i], conflict);
+    if (highest_position > 1) {
+      if (conflict->locally_watched) {
+        loc_watch_literal (highest_literal, lits[!i], conflict);
+      } else {
+        watch_literal (highest_literal, lits[!i], conflict);
+      }
+    }
   }
 
   // Only if the number of highest level literals in the conflict is one
@@ -710,6 +719,13 @@ void Internal::analyze () {
     }
     if (!--open) break;
     reason = var (uip).reason;
+    if (!reason->locally_watched && reason->glue <= 6) {
+      // This could be done in one function, simultanously keeping the
+      // blocking literal, which is currently set to be the other
+      // watcher.
+      unwatch_clause(reason);
+      loc_watch_clause(reason);
+    }
     LOG (reason, "analyzing %d reason", uip);
   }
   LOG ("first UIP %d", uip);

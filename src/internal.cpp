@@ -28,6 +28,7 @@ Internal::Internal ()
   ignore (0),
   propagated (0),
   propagated2 (0),
+  propagated_loc (0),
   best_assigned (0),
   target_assigned (0),
   no_conflict_until (0),
@@ -121,6 +122,7 @@ void Internal::enlarge (int new_max_var) {
   LOG ("enlarge internal size from %zd to new size %zd", vsize, new_vsize);
   // Ordered in the size of allocated memory (larger block first).
   enlarge_only (wtab, 2*new_vsize);
+  enlarge_only (loc_wtab, 2*new_vsize);
   enlarge_only (vtab, new_vsize);
   enlarge_zero (parents, new_vsize);
   enlarge_only (links, new_vsize);
@@ -187,7 +189,8 @@ void Internal::add_original_lit (int lit) {
 int Internal::cdcl_loop_with_inprocessing () {
 
   int res = 0;
-
+  const int downgrade_intervall = 10000;
+  int next_downgrade = stats.conflicts + downgrade_intervall;
   START (search);
 
   if (stable) { START (stable);   report ('['); }
@@ -201,14 +204,47 @@ int Internal::cdcl_loop_with_inprocessing () {
     else if (search_limits_hit ()) break;    // decision or conflict limit
     else if (terminated_asynchronously ())    // externally terminated
       break;
+    else if ( stats.conflicts >= next_downgrade ) {
+      next_downgrade = stats.conflicts + downgrade_intervall;
+      downgrade_all_local_watches();
+    }
     else if (restarting ()) restart ();      // restart by backtracking
-    else if (rephasing ()) rephase ();       // reset variable phases
-    else if (reducing ()) reduce ();         // collect useless clauses
-    else if (probing ()) probe ();           // failed literal probing
-    else if (subsuming ()) subsume ();       // subsumption algorithm
-    else if (eliminating ()) elim ();        // variable elimination
-    else if (compacting ()) compact ();      // collect variables
-    else if (conditioning ()) condition ();  // globally blocked clauses
+    else if (rephasing ()) {
+      downgrade_all_local_watches();
+      rephase ();       			      // reset variable phases
+    }
+    else if (reducing ()) {
+      downgrade_all_local_watches();
+      reduce ();         			      // collect useless clauses
+    }
+    else if (probing ()) {
+      downgrade_all_local_watches();
+      probe ();                                       // failed literal probing
+    }
+    else if (subsuming ()) {
+      downgrade_all_local_watches(); 	// I am not sure if this is necessary,
+					// however, probably, this is better.
+      subsume ();       			      // subsumption algorithm
+    }
+    else if (eliminating ()) {
+      downgrade_all_local_watches();	// I am not sure if this is necessary,
+					// however, probably, this is better.
+      elim ();        				      // variable elimination
+    }
+    else if (false && compacting ()) {
+      downgrade_all_local_watches();	// Here it is definitely necessary.
+      for (auto lit : lits)
+        loc_watches (lit).clear ();     // Actually, this is redundant. 
+      erase_vector (loc_wtab);
+      compact ();     				      // collect variables
+      while (loc_wtab.size () < 2*vsize)	// Initialize again.
+        loc_wtab.push_back (Watches ());
+    }
+    else if (conditioning ()) {
+      downgrade_all_local_watches();	// I am not sure if this is necessary,
+					// however, probably, this is better.
+      condition ();  				      // globally blocked clauses
+    }
     else res = decide ();                    // next decision
   }
 

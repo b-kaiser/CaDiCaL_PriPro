@@ -6,10 +6,12 @@ CaDiCaL_PriPro
 CaDiCaL_PriPro is a hack of CaDiCaL v1.4.0 and debuted in the SAT
 Competition 2021. It introduced the novel idea of Priority Propagation.
 
-Use `./configure && make` to configure and build `cadical` and the library
-`libcadical.a` in the default `build` sub-directory.  The header file of
-the library is [`src/cadical.hpp`](src/cadical.hpp) and includes an example
-for API usage.
+The binary created by the build process is still called `cadical`
+despite being CaDiCaL_PriPro.  Use `./configure && make` to configure
+and build `cadical` and the library `libcadical.a` in the default
+`build` sub-directory.  The header file of the library is
+[`src/cadical.hpp`](src/cadical.hpp) and includes an example for API
+usage.
   
 See [`BUILD.md`](BUILD.md) for options and more details related to the build
 process and [`test/README.md`](test/README.md) for testing the library and

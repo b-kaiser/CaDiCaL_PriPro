@@ -1,6 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-CaDiCaL Simplified Satisfiability Solver
+CaDiCaL_PriPro
 ===============================================================================
 
 The original goal of the development of CaDiCaL was to obtain a CDCL solver,

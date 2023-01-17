@@ -3,17 +3,8 @@
 CaDiCaL_PriPro
 ===============================================================================
 
-The original goal of the development of CaDiCaL was to obtain a CDCL solver,
-which is easy to understand and change, while at the same time not being
-much slower than other state-of-the-art CDCL solvers.  Originally we wanted
-to also radically simplify the design and internal data structures, but that
-goal was only achieved partially, at least for instance compared to
-Lingeling.
-
-However, the code is much better documented and on the other hand CaDiCaL
-actually became in general faster than Lingeling even though it is missing
-some preprocessors (mostly parity and cardinality constraint reasoning),
-which would be crucial to solve certain instances.
+CaDiCaL_PriPro is a hack of CaDiCaL v1.4.0 that introduced the novel
+idea of Priority Propagation and debuted in the SAT Competition 2021.
 
 Use `./configure && make` to configure and build `cadical` and the library
 `libcadical.a` in the default `build` sub-directory.  The header file of

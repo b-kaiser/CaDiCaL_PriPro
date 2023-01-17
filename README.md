@@ -21,7 +21,7 @@ The solver has the following usage `cadical [ dimacs [ proof ] ]`.
 See `cadical -h` for more options.
 
 If you want to cite CaDiCaL\_PriPro please use the solver description in
-the latest SAT competition proceedings:
+the SAT Competition 2021 proceedings:
 
 <pre>
 @inproceedings{KaiserClausecker-SAT-Competition-2020-solvers,

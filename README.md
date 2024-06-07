@@ -4,7 +4,14 @@ CaDiCaL_PriPro
 ===============================================================================
 
 CaDiCaL_PriPro is a hack of CaDiCaL v1.4.0 and debuted in the SAT
-Competition 2021. It introduced the novel idea of Priority Propagation.
+Competition 2021. It introduced the novel idea of Priority Propagation
+and won the "Special Innovation Price" awarded at the SAT Competition
+2021. The version available here is the one used in the competition. A
+later version of CaDiCaL_PriPro containing minor bug fixes and
+improvements, which served as a basis for the publication "Prioritised
+Unit Propagation by Partitioning the Watch Lists" (see below) on Priority
+Propagation, is going to be released in the coming weeks (as of June
+2024).
 
 The binary created by the build process is still called `cadical`
 despite being CaDiCaL_PriPro.  Use `./configure && make` to configure
@@ -20,11 +27,26 @@ the solver.
 The solver has the following usage `cadical [ dimacs [ proof ] ]`.
 See `cadical -h` for more options.
 
-If you want to cite CaDiCaL\_PriPro please use the solver description in
-the SAT Competition 2021 proceedings:
+If you want to cite CaDiCaL\_PriPro please use our publication on
+Priority Propagation:
 
 <pre>
-@inproceedings{KaiserClausecker-SAT-Competition-2020-solvers,
+@inproceedings{kaiser2023pripro,
+  title={Prioritised Unit Propagation by Partitioning the Watch Lists},
+  author={Kaiser, Benjamin and Clausecker, Robert and Mavroskoufis, Michael},
+  booktitle={Proceedings of the 14th International Workshop on Pragmatics of SAT co-located with the 26th International Conference on Theory and Applications of Satisfiability Testing (SAT 2023)},
+  volume={3545},
+  pages={14--34},
+  year={2023},
+  organization={CEUR Workshop Proceedings}
+}
+</pre>
+
+To cite the original solver description in the SAT Competition 2021
+proceedings, use:
+
+<pre>
+@inproceedings{kaiser2021pripro,
     author="Kaiser, Benjamin and Clausecker, Robert",
     editor="Balyo, Tom\'{a}\v{s} and Froleyks, Nils and Heule, Marijn J. H. and Järvisalo, Matti Juhani and Suda, Martin",
     title={{CleanMaple\_PriPro}, {CaDiCaL\_PriPro} and {CaDiCaL\_PriPro\_no\_bin}},
